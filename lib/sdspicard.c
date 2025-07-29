@@ -246,10 +246,27 @@ void run_cat()
 }
 
 
+float normalize_gyro(int16_t val) {
+    return (float)val / 131.0f;
+}
+
+float normalize_accel(int16_t val) {
+    return (float)val / 16384.0f;
+}
+
 // Função para capturar dados do ADC e salvar no arquivo *.txt
-void capture_adc_data_and_save(int32_t x, int32_t y, int32_t z, uint8_t i)
+void capture_adc_data_and_save(int16_t gx, int16_t gy, int16_t gz, int16_t ax, int16_t ay, int16_t az)
 {
-    printf("\nCapturando dados do ADC. Aguarde finalização...\n");
+    //printf("%d, %d, %d, %d, %d, %d\n", gx, gy, gz, ax, ay, az);
+    float ngx, ngy, ngz, nax, nay, naz;
+    ngx = normalize_gyro(gx);
+    ngy = normalize_gyro(gy);
+    ngz = normalize_gyro(gz);
+    nax = normalize_accel(ax);
+    nay = normalize_accel(ay);
+    naz = normalize_accel(az);
+    //printf("%f, %f, %f, %f, %f, %f\n", ngx, ngy, ngz, nax, nay, naz);
+    printf("\nCapturando dados do sensor. Aguarde finalização...\n");
     FIL file;
     FRESULT res = f_open(&file, filename, FA_WRITE | FA_OPEN_EXISTING);
     if (res == FR_NO_FILE)
@@ -260,7 +277,7 @@ void capture_adc_data_and_save(int32_t x, int32_t y, int32_t z, uint8_t i)
             return;
         }
 
-        const char *header = "ROLL,PITCH,YAW\n";
+        const char *header = "G_x,G_y,G_z, A_X, A_Y, A_Z\n";
         UINT bw;
         f_write(&file, header, strlen(header), &bw);
     } else if (res == FR_OK)
@@ -273,7 +290,7 @@ void capture_adc_data_and_save(int32_t x, int32_t y, int32_t z, uint8_t i)
         return;
     }
     char buffer[64];
-    snprintf(buffer, sizeof(buffer), "%ld, %ld, %ld\n", x, y, z);
+    snprintf(buffer, sizeof(buffer), "%.3f, %.3f, %.3f, %.3f, %.3f, %.3f\n", ngx, ngy, ngz, nax, nay, naz);
 
     UINT bw;
     res = f_write(&file, buffer, strlen(buffer), &bw);

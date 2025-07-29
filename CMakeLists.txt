@@ -47,8 +47,11 @@ target_link_libraries(${PROJECT_NAME}
         hardware_clocks
         hardware_adc
         hardware_i2c
+        hardware_pwm
+        hardware_pio
         )
 
+pico_generate_pio_header(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/lib/pioconfig.pio)
 pico_enable_stdio_usb(${PROJECT_NAME} 1)
 pico_enable_stdio_uart(${PROJECT_NAME} 0)
 
