@@ -39,7 +39,7 @@ void run_cat();
 
 
 // Função para capturar dados do ADC e salvar no arquivo *.txt
-void capture_adc_data_and_save();
+void capture_adc_data_and_save(int32_t x, int32_t y, int32_t z, uint8_t i);
 
 // Função para ler o conteúdo de um arquivo e exibir no terminal
 void read_file(const char *filename);

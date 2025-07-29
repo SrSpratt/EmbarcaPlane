@@ -3,7 +3,9 @@
 #include "FreeRTOS.h"
 #include "FreeRTOSConfig.h"
 #include "task.h"
+#include "queue.h"
 #include "pico/bootrom.h"
+
 #define botaoB 6
 #define FLAG_VALUE 0X22
 
@@ -33,6 +35,8 @@ static cmd_def_t cmds[] = {
     {"ls", run_ls, "ls: Lista arquivos"},
     {"cat", run_cat, "cat <filename>: Mostra conteúdo do arquivo"},
     {"help", run_help, "help: Mostra comandos disponíveis"}};
+QueueHandle_t xSensorDataQueue;
+
 
 void vSDTask()
 {
@@ -86,8 +90,13 @@ void vSDTask()
         }
         if (cRxedChar == 'f') // Captura dados do ADC e salva no arquivo se pressionar 'f'
         {
-            printf("PASSOU DIRETO!\n");
-            capture_adc_data_and_save();
+            mpu6050_data data;
+            for (uint8_t i = 0; i < 128; i++)
+            {
+                xQueuePeek(xSensorDataQueue, &data, 0);
+                capture_adc_data_and_save(data.gx, data.gy, data.gz, i);
+                vTaskDelay(pdMS_TO_TICKS(100));
+            }
             printf("\nEscolha o comando (h = help):  ");
         }
         if (cRxedChar == 'g') // Formata o SD card se pressionar 'g'
@@ -169,6 +178,13 @@ void vMPUTask()
             snprintf(str_gy, sizeof(str_gy), "GY:%6d", (int)gy);
             snprintf(str_gz, sizeof(str_gz), "GZ:%6d", (int)gz);
 
+            mpu6050_data sensorData = {
+                .gx = gx,
+                .gy = gy,
+                .gz = gz
+            };
+            xQueueOverwrite(xSensorDataQueue,&sensorData);
+
 
             ssd1306_fill(&ssd, false); // Limpa o display a cada atualização
 
@@ -234,6 +250,8 @@ int main()
     gpio_set_irq_enabled_with_callback(botaoB, GPIO_IRQ_EDGE_FALL, true, &gpio_irq_handler);
 
     stdio_init_all();
+
+    xSensorDataQueue = xQueueCreate(1, sizeof(mpu6050_data));
 
     xTaskCreate(vSDTask, "SD Card Task", 1024, NULL, tskIDLE_PRIORITY, NULL);
     xTaskCreate(vMPUTask, "MPU Read Task", 1024, NULL, tskIDLE_PRIORITY, NULL);

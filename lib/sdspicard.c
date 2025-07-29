@@ -6,7 +6,7 @@
 bool logger_enabled;
 const uint32_t period = 1000;
 absolute_time_t next_log_time;
-char filename[20] = "adc_data1.txt";
+char filename[20] = "new_file.txt";
 
 sd_card_t *sd_get_by_name(const char *const name)
 {
@@ -247,35 +247,41 @@ void run_cat()
 
 
 // Função para capturar dados do ADC e salvar no arquivo *.txt
-void capture_adc_data_and_save()
+void capture_adc_data_and_save(int32_t x, int32_t y, int32_t z, uint8_t i)
 {
     printf("\nCapturando dados do ADC. Aguarde finalização...\n");
     FIL file;
-    FRESULT res = f_open(&file, filename, FA_WRITE | FA_CREATE_ALWAYS);
-    printf("AQUI\n");
-    if (res != FR_OK)
+    FRESULT res = f_open(&file, filename, FA_WRITE | FA_OPEN_EXISTING);
+    if (res == FR_NO_FILE)
+    {
+        res = f_open(&file, filename, FA_WRITE | FA_CREATE_NEW);
+        if (res != FR_OK) {
+            printf("\n[ERRO] Não foi possível criar o arquivo.\n");
+            return;
+        }
+
+        const char *header = "ROLL,PITCH,YAW\n";
+        UINT bw;
+        f_write(&file, header, strlen(header), &bw);
+    } else if (res == FR_OK)
+    {
+        f_lseek(&file, f_size(&file));
+    }
+    else
     {
         printf("\n[ERRO] Não foi possível abrir o arquivo para escrita. Monte o Cartao.\n");
         return;
     }
-    for (int i = 0; i < 128; i++)
+    char buffer[64];
+    snprintf(buffer, sizeof(buffer), "%ld, %ld, %ld\n", x, y, z);
+
+    UINT bw;
+    res = f_write(&file, buffer, strlen(buffer), &bw);
+    if (res != FR_OK)
     {
-        adc_select_input(0);
-        //printf("SELECIONOU\n");
-        uint16_t adc_value = adc_read();
-        //printf("LEU\n");
-        char buffer[50];
-        //printf("GRAVOU\n");
-        UINT bw;
-        res = f_write(&file, buffer, strlen(buffer), &bw);
-        //printf("ERA PARA TER ESCRITO\n");
-        if (res != FR_OK)
-        {
-            printf("[ERRO] Não foi possível escrever no arquivo. Monte o Cartao.\n");
-            f_close(&file);
-            return;
-        }
-        vTaskDelay(pdMS_TO_TICKS(100));
+        printf("[ERRO] Não foi possível escrever no arquivo. Monte o Cartao.\n");
+        f_close(&file);
+        return;
     }
     f_close(&file);
     printf("\nDados do ADC salvos no arquivo %s.\n\n", filename);

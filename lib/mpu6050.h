@@ -1,3 +1,5 @@
+#ifndef MPU6050_H
+#define MPU6050_H
 
 #include "hardware/i2c.h"
 #include "hardware/adc.h"
@@ -18,8 +20,17 @@
 #define DISP_W 128
 #define DISP_H 64
 
+typedef struct {
+    int32_t gx;
+    int32_t gy;
+    int32_t gz;
+} mpu6050_data;
+
 extern int addr;
 extern ssd1306_t ssd;
 
+
 void mpu6050_reset();
 void mpu6050_read_raw(int16_t accel[3], int16_t gyro[3], int16_t *temp);
+
+#endif

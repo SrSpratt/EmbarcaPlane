@@ -1,4 +1,9 @@
+
 #include "mpu6050.h"
+#include "FreeRTOS.h"
+#include "FreeRTOSConfig.h"
+#include "task.h"
+#include "queue.h"
 
 int addr = 0x68;
 ssd1306_t ssd;
@@ -7,10 +12,10 @@ void mpu6050_reset()
 {
     uint8_t buf[] = {0x6B, 0x80};
     i2c_write_blocking(I2C_PORT, addr, buf, 2, false);
-    sleep_ms(100);
+    vTaskDelay(pdMS_TO_TICKS(100));
     buf[1] = 0x00;
     i2c_write_blocking(I2C_PORT, addr, buf, 2, false);
-    sleep_ms(10);
+    vTaskDelay(pdMS_TO_TICKS(10));
 }
 
 void mpu6050_read_raw(int16_t accel[3], int16_t gyro[3], int16_t *temp)
