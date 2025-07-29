@@ -40,7 +40,7 @@ plt.scatter(tempo, A_z, label='A_z', s=20)
 plt.plot(tempo, A_z, '--', linewidth=0.8)
 plt.title('Acelerômetro (A_x, A_y, A_z)')
 plt.xlabel('Índice da amostra (linha)')
-plt.ylabel('Valor do Acelerômetro (referência 2g)')
+plt.ylabel('Valor do Acelerômetro (extremos = 2g)')
 plt.legend()
 plt.grid()
 
