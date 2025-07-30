@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Carrega os dados, pulando a primeira linha de cabeçalho e usando vírgula como separador
-data = np.loadtxt('new_file.txt', delimiter=',', skiprows=1)
+data = np.loadtxt('mpu_data.csv', delimiter=',', skiprows=1)
 
 tempo = np.arange(data.shape[0])
 

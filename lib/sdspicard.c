@@ -6,7 +6,7 @@
 bool logger_enabled;
 const uint32_t period = 1000;
 absolute_time_t next_log_time;
-char filename[20] = "new_file.txt";
+char filename[20] = "mpu_data.csv";
 
 sd_card_t *sd_get_by_name(const char *const name)
 {

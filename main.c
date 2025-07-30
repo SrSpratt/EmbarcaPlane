@@ -215,7 +215,7 @@ void vSDTask()
         if (cRxedChar == 'f') // Captura dados do ADC e salva no arquivo se pressionar 'f'
         {
             mpu6050_data data;
-            for (uint8_t i = 0; i < 10; i++)
+            for (uint8_t i = 0; i < 20; i++)
             {
                 xQueuePeek(xSensorDataQueue, &data, 0);
                 capture_adc_data_and_save(data.gx, data.gy, data.gz, data.ax, data.ay, data.az);
@@ -517,12 +517,6 @@ void vMPUTask()
             snprintf(str_pitch, sizeof(str_pitch), "P:%5.1f", pitch);
             // ssd1306_draw_string(&ssd, str_roll, 5, 54);
             // ssd1306_draw_string(&ssd, str_pitch, 68, 54);
-
-            // Exibe os valores para a temperatura
-            char str_tmp[5];                                   // String para a temperatura
-            sprintf(str_tmp, "%.1fC", (temp / 340.0) + 15); // Temperatura em Celsius
-            ssd1306_draw_string(&ssd, str_tmp, 80, 0); // Exibe a temperatura no display
-
 
             ssd1306_send_data(&ssd);                   // Envia os dados para o display
         }
